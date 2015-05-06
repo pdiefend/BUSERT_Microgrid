@@ -1,0 +1,37 @@
+This file will walk through the process of ecobee authorization. This text file references the python program Ecobee.py.
+
+
+Some printing comments may need to be uncommeted
+
+
+1. Run Authorize()
+
+2. Read the output in the shell
+
+3. Locate the four digit key to the right of ecobeePin
+ 
+4. Copy this key
+
+5. Navigate to Ecobee.com
+
+6. Enter Login credentials
+
+7. Navigate to Settings tab
+
+8. Open apps tab on the left hand side of the screen
+
+9. Enter the four digit key
+
+10. Return to python IDLE
+
+11. Navigate to the Refresh_Token() function
+
+12. change params of p = request.post(url_refresh, params = ) to "payload_auth"
+
+13. In same line, change code: xxxxxxx to the code provided in the shell during step 2.
+
+13. Run Refresh_Token()
+
+14. Open Refresh.txt
+
+15. Ensure refresh token matches the shell output
