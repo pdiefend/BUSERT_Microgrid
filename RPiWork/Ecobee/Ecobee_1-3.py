@@ -1,4 +1,5 @@
 # Changes in V3: Made all operations happen through a class, for easier access
+# Changes in V4: Made the class functions better suited for the control system.  Cleaned up code better.
 
 #Important Note: If both the access key and refresh key expire due to an incidental action, the application must be re-authicated with the authorize function.
 #Data can only be posted every 15 seconds (or 30... need to verify) otherwise an error will occur.
@@ -21,60 +22,153 @@ class EcobeeThermostat:
     
     # Intializes the instance variables.
     def __init__(self):
+        #Instantiates an object of type thermostat
         self.coolHoldTemp = None
         self.heatHoldTemp = None
         self.fan = None
         self.thermostatID = None
         self.needsAuthetication = False
         self.nameString = ""
-        self.hvacMode = "auto"
+        self.hvacMode = None
+        self.actualTemp = None  #Note: This is only accurate immidiately following a refreshValues() call
         return
-    
-
-    # Changes the setting for the hold temps.  
-    #   Settings still need to be pushed to device for effect though.
-    def changeHoldTemp(self, heatTemp, coolTemp):
-        ## Add in assertion for integer in the hundreds, and continutity between hot and cold
-        self.coolHoldTemp = coolTemp
-        self.heatHoldTemp = heatTemp
-        return
-    
-    # Changes the setting for the fan.  Settings still need
-`   #   to be pushed to device for effect though.
-    def changeFan(self,option):
-        if option != 'on' and option != 'auto':
-            print("The options are 'on' or 'auto', nothing else")
-            return
-        else:
-            print("Fan mode changed")
-            self.fan = option
-        return
-
-    def changeHVACMode(self, option):
-        if (option != "auto" or option != "auxHeatOnly" 
-            or option != "cool" or option != "heat" or option != "off"):
-           print("Wrong input")
+        
+    def changeSettings(self, heatTemp, coolTemp, fanMode, hvacMode):
+        #This is the main function to change the climate.  The pickle is automatically saved at the end of function.
+        #INPUTS: coolTemp, heatTemp - These integers are the fahrenheit temperatures, times 10.  E.G. 64 deg F needs to be input as 640
+        #        fanMode - A string that is either "on" or "auto" to control the fan mode
+        #        hvacMode - A string that is either "auto", "auxHeatOnly", "cool", "heat", or "off"
+        #OUTPUTS: Boolean Status Value.  True is returned if posted sucessfully.
+        
+   #Changes the hvac mode in the object before it is posted
+        if (hvacMode != "auto" or hvacMode != "auxHeatOnly" or hvacMode != "cool" or hvacMode != "heat" or hvacMode != "off"):
+           print("Wrong hvacMode input.")
            return
         else:
-            self.hvacMode = option
+            self.hvacMode = hvacMode
+
+   #Changes the Fan mode in the object before updating
+        if fanMode != 'on' and fanMode != 'auto':
+            print("The fan options are 'on' or 'auto', nothing else")
+            return
+        else:
+            self.fan = fanMode
+
+   #Changes the cool and heat hold temperatures before updating.
+        if coolTemp < 400 or coolTemp > 1000:
+            print("The input cool temperature is not within accepted range.")
+            return
+        else:
+            self.coolHoldTemp = coolTemp
+
+        if heatTemp < 400 or heatTemp > 1000:
+            print("The input heat temperature is not within accepted range.")
+            return
+        else:
+            self.heatHoldTemp = heatTemp
+
+    #Posting occurs
+        result = self.postToDevice()
+
+    #Updates the pickle with what the thermostat was set to and returns appropriate boolean with appropriate status
+        if result == True:
+            self.postToPickle()
+            return True
+        else:
+            return False
+
+
+
+
+    def refreshValues(self):
+    #This function polls ecobee for the states of the two thermostats and updates their pickles accordingly
+    #INPUTS: None
+    #OUTPUTS: None, though it does change the pickles
+        
+    #Setup headers for a query
+        self.refreshToken()
+        Headers()
+        url_1 = 'https://api.ecobee.com/1/thermostat?json='\
+                '{'\
+                    "selection"':'\
+                    '{'\
+                        '"selectionType":"thermostats",'\
+                        '"selectionMatch":"'
+        identifier = str(self.thermostatID)
+        url_2 = '","includeAlerts":"true",'\
+                        '"selectionType":"registered",'\
+                        '"selectionMatch":";'
+
+        url_3 ='",'\
+                        '"includeEvents":"true",'\
+                        '"includeSettings":"true",'\
+                        '"includeRuntime":"true"'\
+                      '}'\
+                  '}'
+        url_t = url_1 + identifier + url_2 + url_3
+        s = requests.get(url_t, headers = url_Headers)
+
+    #JSON operations to make the json parsable.
+        #PrintResponse(s)
+        data = json.loads(s.text)
+
+    #The simplification below will hold so long as there are only 2 thermostats in the system
+        if int(data["thermostatList"][0]["identifier"]) == self.thermostatID:
+            index = 0
+        else:
+            index = 1
+            print("else")
+
+        
+        
+    #Look for the the various parameters and save them
+        print("fanMode")
+        print(data["thermostatList"][index]["runtime"]["desiredFanMode"])
+
+        print("heatHold")
+        print(data["thermostatList"][index]["runtime"]["desiredHeat"])
+
+        print("coolHold")
+        print(data["thermostatList"][index]["runtime"]["desiredCool"])
+        
+        print("hvacMode")
+        print(data["thermostatList"][index]["settings"]["hvacMode"])
+
+        print("actualTemp")
+        print(data["thermostatList"][index]["runtime"]["actualTemperature"])
+
+        self.coolHoldTemp = int(data["thermostatList"][index]["runtime"]["desiredCool"])
+        self.heatHoldTemp = int(data["thermostatList"][index]["runtime"]["desiredHeat"])
+        self.fan = data["thermostatList"][index]["runtime"]["desiredFanMode"]
+        self.hvacMode = data["thermostatList"][index]["settings"]["hvacMode"]
+        self.actualTemp = int(data["thermostatList"][index]["runtime"]["actualTemperature"])
+
+    #Stores the values into the thermostat object pickle
+        self.postToPickle()
+
         return
-    
-    # This function actually changes the settings on the real thermostat.
-    def postSettingsToDevice(self):
+
+######################################################################################################################################
+### All functions below are helper functions, and can largely be ignored.
+######################################################################################################################################
+
+    def postToDevice(self):
+        #This device is a wrapper to do the actual posting
         self.refreshToken()
         Headers()
         post_body = 'https://api.ecobee.com/1/thermostat?format=json&body='
         post_body_end = '}'
         # If you want a hold that only runs until a certain time, holdtype 
         #     becomes datetime, the number 4 changes to 6, and endtime and enddate parameters are needed
-        url = post_body + Post_selection('thermostats', ""+str(self.thermostatID)+"", self.hvacMode)
+        url = post_body + Post_selection('thermostats', ""+str(self.thermostatID)+"", self.hvacMode) \
          + Post_function(4, 'setHold', 'fan', self.fan, 'heatHoldTemp', self.heatHoldTemp, 'coolHoldTemp',
          self.coolHoldTemp, 'holdType', 'indefinite') + post_body_end
         print(url)
         post = requests.post(url, headers = url_Headers)
-        self.postToPickle()
-        PrintResponse(post)
-        return
+        if post.status_code == 200:
+            return True
+        else:
+            return False
 
     # Helper function to procure the refresh token.
     def refreshToken(self):
@@ -84,7 +178,7 @@ class EcobeeThermostat:
         payload2 = {'grant_type': 'refresh_token','code':refresh_Token, 'client_id':API_Key}
         url_refresh = 'https://api.ecobee.com/token'
         p = requests.post(url_refresh, params = payload2)
-        PrintResponse(p)
+       # PrintResponse(p)
         Refresh_json = p.json()
         Refresh_json_string = str(Refresh_json)
         
@@ -108,31 +202,8 @@ class EcobeeThermostat:
         pickle.dump(self,open(file,'wb'))
         return
     
-    # Used to return current state info from a thermostat.
-    def getInfo(self):
-        self.refreshToken()
-        Headers()
-        url_1 = 'https://api.ecobee.com/1/thermostat?json='\
-                '{'\
-                    "selection"':'\
-                    '{'\
-                        '"selectionType":"thermostats",'\
-                        '"selectionMatch":"'
-        identifier = str(self.thermostatID)
-        url_2 = '","includeAlerts":"true",'\
-                        '"selectionType":"registered",'\
-                        '"selectionMatch":"",'\
-                        '"includeEvents":"true",'\
-                        '"includeSettings":"true",'\
-                        '"includeRuntime":"true"'\
-                      '}'\
-                  '}'
-        url_t = url_1 + identifier + url_2
-        s = requests.get(url_t, headers = url_Headers)
-        PrintResponse(s)
-        json = s.json()
-        json_string = str(json)
-        return
+    
+        
     
 def Post_function(number_params, function_type, parameter_1, value_1, parameter_2 = 0 , value_2 = 0 , parameter_3 = 0, value_3 = 0, parameter_4 = 0, value_4 = 0, parameter_5 = 0, value_5 = 0,\
               parameter_6 = 0, value_6 = 0, parameter_7 = 0, value_7 = 0, parameter_8 = 0, value_8 = 0, parameter_9  = 0, value_9 = 0):
