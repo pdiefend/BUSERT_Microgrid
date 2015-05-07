@@ -3,6 +3,11 @@
 
 import Island
 import pickle
+import datetime
+
+print('==================================================')
+print('5Min Subprocess')
+print(str(datetime.datetime.now()))
 
 def performLM():
     print('Managing Loads')
@@ -20,10 +25,12 @@ islanded = Island.IsIslanded()
 # Check to see if islanded and we know it
 if (islanded and ((current['mode'] == 'Island') or current['outage'])):
     # then perfrom LM tasks
+    print('Islanded Operation')
     performLM()
 
 # if islanded but we didn't know
 elif islanded:
+    print('Utility Outage Island')
     # Update our current status
     current['outage'] = True
     Island.Island(True)
@@ -32,6 +39,7 @@ elif islanded:
 
 # otherwise we are not islanded
 else:
+    print('Normal Operation')
     # Update our current status
     current['outage'] = False
     # we are done, no short-term LM necessary

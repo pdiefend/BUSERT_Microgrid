@@ -13,7 +13,7 @@ import csv
 class AcuRevServer():
 	def __init__(self):
 		self.t = threading.Thread(name='httpDaemon', target=self.http_server)
-		#self.t.start()
+		self.t.start()
 		self.data = {}
 		self.request = {}
 	def http_server(self):
@@ -38,15 +38,15 @@ class AcuRevServer():
 		###Create file if nesscesary, and add headers
 		state = os.path.isfile(self.filename())
 		if state == False:
-			f = open(self.filename(), 'w')
+			f = open(self.filename(), 'wb')
 			f.write(self.request.files[u'file'][0][u'body'])
 			f.close()
 		else:
 			##If not just write stuff
-			f = open(self.filename(), 'a')
-			substring = self.request.files[u'file'][0][u'body']
+			f = open(self.filename(), 'ab')
+			substring = self.request.files[u'file'][0][u'body'].decode('utf-8')
 			idx = substring.index('\r')
-			f.write(substring[idx:])
+			f.write(bytes(substring[idx:], 'utf-8'))
 			f.close()
 		
 		# ^Why are the above accesses in UTF-8, but the operational one is in bytes?
@@ -54,7 +54,7 @@ class AcuRevServer():
 
 		# Store the most recent data in a pickle for the control system
 		# open the file where the meter data is stored and create a CSV Dict Reader
-		datFile = open(self.filename, 'r')
+		datFile = open(self.filename(), 'r')
 		reader = csv.DictReader(datFile)
 		
 		# create a temporary empty Dict, this is where the data will go
@@ -65,9 +65,10 @@ class AcuRevServer():
 			tmp = row
 		
 		# Dump the last row of the CSV as a Dict to a pickle that can be accessed by the
-`		# control system when it is needed. I should trigger the control system to run one minute
+		# control system when it is needed. I should trigger the control system to run one minute
 		# after the data is received or find a way that is not dependent on the meter's timing
-		pickle.dump(tmp, open('pickles/meter.p', 'wb')) # this MUST be in bytes
+		
+		pickle.dump(tmp, open('/home/pi/BUSERT_Microgrid/RPiWork/pickles/meter.p', 'wb')) # this MUST be in bytes
 		#print(tmp['Time'])
 		
 		# Clean up and move on

@@ -5,6 +5,13 @@ import pickle
 import datetime
 from WU import WU
 import Island
+import datetime
+
+
+print('==================================================')
+print('Hourly Subprocess')
+print(str(datetime.datetime.now()))
+
 
 # Unload LMP
 lmp = pickle.load(open('pickles/LMP.p', 'rb'))

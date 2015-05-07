@@ -13,34 +13,34 @@ Gmail_Pass = passwords.GMAIL_PASS
 recpients = passwords.GMAIL_RECP
 
 # pull pin 9 high to remote island, pull pin 9 low to return to auto
-island_url =  'https://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&led=1'
-gridTie_url = 'https://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&led=0'
-status_url =  'https://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&status'
+island_url =  'http://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&led=1'
+gridTie_url = 'http://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&led=0'
+status_url =  'http://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&status'
 
 # pull pin 9 high to disable breaker, low to turn back on
-raux_off_url = 'https://agent.electricimp.com/'+Raux_base+'?username='+username+'&password='+password+'&led=1'
-raux_on_url =  'https://agent.electricimp.com/'+Raux_base+'?username='+username+'&password='+password+'&led=0'
+raux_off_url = 'http://agent.electricimp.com/'+Raux_base+'?username='+username+'&password='+password+'&led=1'
+raux_on_url =  'http://agent.electricimp.com/'+Raux_base+'?username='+username+'&password='+password+'&led=0'
 
 # Island from the power grid
 def Island(outage):
     # Disable Raux2    
     #urllib.request.urlretrieve(raux_off_url, 'impStat.txt') # <==================================
 
-    server = smtplib.SMTP( "smtp.gmail.com", 587 )
-    server.ehlo()
-    server.starttls()
-    server.login( Gmail_User, Gmail_Pass )
+    #server = smtplib.SMTP( "smtp.gmail.com", 587 )
+    #server.ehlo()
+    #server.starttls()
+    #server.login( Gmail_User, Gmail_Pass )
 
     if outage:
         # Notify User that outage occured, ATS Islanded automatically
         print("notifying user that a utility outage occured")
-        server.sendmail(Gmail_User, recpients, 'A Utility Outage Occured')
-        server.quit()
+        #server.sendmail(Gmail_User, recpients, 'A Utility Outage Occured')
+        #server.quit()
     else:
         # Notify User that we will island Manually
         print("notifying user that the system will Island itself")
-        server.sendmail(Gmail_User, recpients, 'Microgrid will now Island itself')
-        server.quit()
+        #server.sendmail(Gmail_User, recpients, 'Microgrid will now Island itself')
+        #server.quit()
         # Island the Microgrid
         #urllib.request.urlretrieve(island_url, 'impStat.txt') # <==================================
 
