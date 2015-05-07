@@ -41,7 +41,7 @@ class EcobeeThermostat:
     # OUTPUTS: Boolean Status Value.  True is returned if posted sucessfully.
     def changeSettings(self, heatTemp, coolTemp, fanMode, hvacMode):
         # Changes the hvac mode in the object before it is posted
-        if (hvacMode != "auto" or hvacMode != "auxHeatOnly" or hvacMode != "cool" or hvacMode != "heat" or hvacMode != "off"):
+        if (hvacMode != 'auto' and hvacMode != 'auxHeatOnly' and hvacMode != 'cool' and hvacMode != 'heat' and hvacMode != 'off'):
            print("Wrong hvacMode input.")
            return
         else:
@@ -68,7 +68,7 @@ class EcobeeThermostat:
             self.heatHoldTemp = heatTemp
 
         #Posting occurs
-        result = self.postToDevice()
+        result = self.postToDevice() # <===============================================================================
 
         #Updates the pickle with what the thermostat was set to and returns appropriate boolean with appropriate status
         if result == True:
@@ -118,6 +118,7 @@ class EcobeeThermostat:
         
         
         #Look for the the various parameters and save them
+        '''
         print("fanMode")
         print(data["thermostatList"][index]["runtime"]["desiredFanMode"])
 
@@ -132,6 +133,7 @@ class EcobeeThermostat:
 
         print("actualTemp")
         print(data["thermostatList"][index]["runtime"]["actualTemperature"])
+        '''
 
         self.coolHoldTemp = int(data["thermostatList"][index]["runtime"]["desiredCool"])
         self.heatHoldTemp = int(data["thermostatList"][index]["runtime"]["desiredHeat"])

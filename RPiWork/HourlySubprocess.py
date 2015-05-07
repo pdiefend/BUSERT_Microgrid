@@ -9,6 +9,12 @@ import datetime
 from Ecobee_13 import EcobeeThermostat
 
 
+preCoolDelta = 50 # amount setpoint is varied during precooling
+preHeatDelta = 50 # amount setpoint is varied during preheating
+
+LMCoolDelta = 50 # amount setpoint is varied during Load Management Mode
+LMHeatDelta = 50 # amount setpoint is varied during Load Management Mode
+
 print('==================================================')
 print('Hourly Subprocess')
 print(str(datetime.datetime.now()))
@@ -62,17 +68,17 @@ except FileNotFoundError:
     print('Recovering lost data')
     # Restore settings from the Ecobee. Create a spot for outage, 
     # 5Min will set it properly in a few seconds
-    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 60, 'DownNormCool': 73, 'UpHeatCool': 60, 'UpNormCool': 73,'outage': False}
+    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 60, 'DownNormCool': 73, 'UpNormHeat': 60, 'UpNormCool': 73,'outage': False}
 
 # Refresh values from the Thermostats in case user changed them
 downstairs.refreshValues()
-upstairs.refreshValue()
+upstairs.refreshValues()
 
 # If the last hour was running in normal mode, then update the hold temperatures
-if(current['mode'] = 'Normal'):
+if(current['mode'] == 'Normal'):
     current['DownNormHeat'] = downstairs.heatHoldTemp
     current['DownNormCool'] = downstairs.coolHoldTemp
-    current['UpHeatCool'] = upstairs.heatHoldTemp
+    current['UpNormHeat'] = upstairs.heatHoldTemp
     current['UpNormCool'] = upstairs.coolHoldTemp
 
 hour = datetime.datetime.now().time().hour
@@ -91,45 +97,63 @@ if utilityLM:
     currentMode = 'LM'
 # ================================================================
 
-# If the last mode != current mode, change thermostat/ATS, else leave it be.
-
-if(currentMode == 'Consumption'):
-    # Consumption Mode Activate all consumption devices
-    print('Consume')
-    Island.GridTie()    
-
-elif(currentMode == 'Pre-heat'):
-    # Pre-heat the HVAC system
-    print('Pre-heat')
-    Island.GridTie()    
-
-elif(currentMode == 'Pre-cool'):
-    # Pre-cool the HVAC system
-    print('Pre-cool')
-    Island.GridTie()    
-
-elif(currentMode == 'LM' or currentMode == 'Island'):
+# Daily Lookahead Override (Takes Utility LM into account as well)
+if(currentMode == 'LM' or currentMode == 'Island'):
     # High PV forecast?
     if(conditions == 'Clear' or conditions == 'Partly Cloudy'):
-        # Load Management Mode (a.k.a. grid-tied reduction)
-        print('LM')
         currentMode = 'LM'
+    else:
+        currentMode = 'Island'
+        
+print(currentMode)
+
+# If the last mode != current mode, change thermostat/ATS, else leave it be.
+if (currentMode != current['mode']):
+    print('Modes Changed since last hour')
+    if(currentMode == 'Consumption'):
+        # Consumption Mode Activate all consumption devices
+        Island.GridTie()
+        upstairs.changeSettings(current['UpNormHeat'] + preHeatDelta, current['UpNormCool'] -preCoolDelta, 'on', 'auto')
+        # delay?
+        downstairs.changeSettings(current['DownNormHeat'] + preHeatDelta, current['DownNormCool'] -preCoolDelta, 'on', 'auto')
+    
+    elif(currentMode == 'Pre-heat'):
+        # Pre-heat the HVAC system
+        Island.GridTie()
+        upstairs.changeSettings(current['UpNormHeat'] + preHeatDelta, current['UpNormCool'], 'auto', 'auto')
+        # delay?
+        downstairs.changeSettings(current['DownNormHeat']+ preHeatDelta, current['DownNormCool'], 'auto', 'auto')    
+    
+    elif(currentMode == 'Pre-cool'):
+        # Pre-cool the HVAC system
+        Island.GridTie()
+        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'] - preCoolDelta, 'auto', 'auto')
+        # delay?
+        downstairs.changeSettings(current['DownNormHeat'], current['DownNormCool'] - preCoolDelta, 'auto', 'auto')    
+    
+    elif(currentMode == 'LM'):
         Island.GridTie()
         # Reduce Managed Loads and set HVAC to conservation points
-
-    else:
+        upstairs.changeSettings(current['UpNormHeat'] - LMHeatDelta, current['UpNormCool'] + LMCoolDelta, 'on', 'auto')
+        # delay?
+        downstairs.changeSettings(current['DownNormHeat'] - LMHeatDelta, current['DownNormCool'] + LMCoolDelta, 'on', 'auto')
+    
+    elif(currentMode == 'Island'):
         # Island Mode (a.k.a. isolated reduction)
-        print('Island')        
-        currentMode = 'Island'
         # Run Island Subprocess
         Island.Island(False)
-        # 5 min should handle LM if Islanded     
-
-else: #(currentMode == 'Normal')
-    # Normal Mode    
-    print('Normal')    
-    Island.GridTie()
-
+        # 5 min should handle LM if Islanded
+        upstairs.changeSettings(current['UpNormHeat'] - LMHeatDelta, current['UpNormCool'] + LMCoolDelta, 'on', 'auto')
+        # delay?
+        downstairs.changeSettings(current['DownNormHeat'] - LMHeatDelta, current['DownNormCool'] + LMCoolDelta, 'on', 'auto')
+    
+    else: #(currentMode == 'Normal')
+        # Normal Mode    
+        Island.GridTie()
+        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'], 'auto', 'auto')
+        # delay?
+else:
+    print('Modes have not changed since last hour') 
 
 # Update the current settings with our new operational points and store it
 current['conditions'] = conditions
