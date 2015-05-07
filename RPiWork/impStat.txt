@@ -1,1 +1,1 @@
-OK Status: Islanded=false
+OK RELAY:0

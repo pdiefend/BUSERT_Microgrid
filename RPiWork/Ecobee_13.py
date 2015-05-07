@@ -33,28 +33,28 @@ class EcobeeThermostat:
         self.actualTemp = None  #Note: This is only accurate immidiately following a refreshValues() call
         return
         
+    # This is the main function to change the climate.  The pickle is automatically saved at the end of function.
+    # INPUTS: coolTemp, heatTemp - These integers are the fahrenheit temperatures, times 10.  
+    # E.G. 64 deg F needs to be input as 640
+    #        fanMode - A string that is either "on" or "auto" to control the fan mode
+    #        hvacMode - A string that is either "auto", "auxHeatOnly", "cool", "heat", or "off"
+    # OUTPUTS: Boolean Status Value.  True is returned if posted sucessfully.
     def changeSettings(self, heatTemp, coolTemp, fanMode, hvacMode):
-        #This is the main function to change the climate.  The pickle is automatically saved at the end of function.
-        #INPUTS: coolTemp, heatTemp - These integers are the fahrenheit temperatures, times 10.  E.G. 64 deg F needs to be input as 640
-        #        fanMode - A string that is either "on" or "auto" to control the fan mode
-        #        hvacMode - A string that is either "auto", "auxHeatOnly", "cool", "heat", or "off"
-        #OUTPUTS: Boolean Status Value.  True is returned if posted sucessfully.
-        
-   #Changes the hvac mode in the object before it is posted
+        # Changes the hvac mode in the object before it is posted
         if (hvacMode != "auto" or hvacMode != "auxHeatOnly" or hvacMode != "cool" or hvacMode != "heat" or hvacMode != "off"):
            print("Wrong hvacMode input.")
            return
         else:
             self.hvacMode = hvacMode
 
-   #Changes the Fan mode in the object before updating
+        # Changes the Fan mode in the object before updating
         if fanMode != 'on' and fanMode != 'auto':
             print("The fan options are 'on' or 'auto', nothing else")
             return
         else:
             self.fan = fanMode
 
-   #Changes the cool and heat hold temperatures before updating.
+        # Changes the cool and heat hold temperatures before updating.
         if coolTemp < 400 or coolTemp > 1000:
             print("The input cool temperature is not within accepted range.")
             return
@@ -67,24 +67,20 @@ class EcobeeThermostat:
         else:
             self.heatHoldTemp = heatTemp
 
-    #Posting occurs
+        #Posting occurs
         result = self.postToDevice()
 
-    #Updates the pickle with what the thermostat was set to and returns appropriate boolean with appropriate status
+        #Updates the pickle with what the thermostat was set to and returns appropriate boolean with appropriate status
         if result == True:
             self.postToPickle()
             return True
         else:
             return False
 
-
-
-
-    def refreshValues(self):
     #This function polls ecobee for the states of the two thermostats and updates their pickles accordingly
     #INPUTS: None
     #OUTPUTS: None, though it does change the pickles
-        
+    def refreshValues(self):
     #Setup headers for a query
         self.refreshToken()
         Headers()
@@ -108,20 +104,20 @@ class EcobeeThermostat:
         url_t = url_1 + identifier + url_2 + url_3
         s = requests.get(url_t, headers = url_Headers)
 
-    #JSON operations to make the json parsable.
+        #JSON operations to make the json parsable.
         #PrintResponse(s)
         data = json.loads(s.text)
 
-    #The simplification below will hold so long as there are only 2 thermostats in the system
+        #The simplification below will hold so long as there are only 2 thermostats in the system
         if int(data["thermostatList"][0]["identifier"]) == self.thermostatID:
             index = 0
         else:
             index = 1
-            print("else")
+            # print("else") <============================== Why is this here? PRD
 
         
         
-    #Look for the the various parameters and save them
+        #Look for the the various parameters and save them
         print("fanMode")
         print(data["thermostatList"][index]["runtime"]["desiredFanMode"])
 
@@ -143,7 +139,7 @@ class EcobeeThermostat:
         self.hvacMode = data["thermostatList"][index]["settings"]["hvacMode"]
         self.actualTemp = int(data["thermostatList"][index]["runtime"]["actualTemperature"])
 
-    #Stores the values into the thermostat object pickle
+        #Stores the values into the thermostat object pickle
         self.postToPickle()
 
         return
@@ -199,7 +195,7 @@ class EcobeeThermostat:
     # Saves this instance in a similarly named pickle.
     def postToPickle(self):
         file = self.nameString + '.p'
-        pickle.dump(self,open(file,'wb'))
+        pickle.dump(self,open('pickles/'+file,'wb'))
         return
     
     
@@ -350,7 +346,7 @@ open the apps tab on the left side of the screen, enter the four digit key, and 
         print("Your authorization may be not have suceeded.  See the above output to see if there was an error.")
     
 
-downstairs = pickle.load(open("downstairs.p",'rb'))
-upstairs = pickle.load(open("upstairs.p",'rb'))
+#downstairs = pickle.load(open("pickles/downstairs.p",'rb'))
+#upstairs = pickle.load(open("pickles/upstairs.p",'rb'))
 
 ##Authorize()

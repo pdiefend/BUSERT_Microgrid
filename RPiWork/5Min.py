@@ -17,7 +17,12 @@ def performLM():
     # ================================================================
 
 # Load current status of system
-current = pickle.load(open('pickles/current.p','rb'))
+try:
+    current = pickle.load(open('pickles/curent.p','rb'))
+except FileNotFoundError:
+    print('ERROR: Current Settings pickle not found')
+    print('No further actions will be taken')
+    quit()
 
 # check to see if we are islanded on the ATS
 islanded = Island.IsIslanded()
