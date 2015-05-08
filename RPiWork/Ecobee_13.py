@@ -11,9 +11,10 @@ import pickle
 import requests
 import time
 import json
+import passwords
 
 #Access Credentials
-API_Key = '1gquZ74nIEaz6B2z9tUqjqQCr0c7wnUy'
+API_Key = passwords.ECOBEE_API
 Scope = 'smartWrite'
 payload = {'response_type':'ecobeePin', 'client_id':API_Key, 'scope':Scope}
 
@@ -72,7 +73,7 @@ class EcobeeThermostat:
             self.heatHoldTemp = heatTemp
 
         #Posting occurs
-        result = self.postToDevice() # <===============================================================================
+        result = self.postToDevice() # <====== Kill this line for offsite testing =======================
 
         #Updates the pickle with what the thermostat was set to and returns appropriate boolean with appropriate status
         if result == True:
@@ -116,10 +117,7 @@ class EcobeeThermostat:
             index = 0
         else:
             index = 1
-            # print("else") <============================== Why is this here? PRD  <===================================================It was for my debugging use.  I forgot to delete it.  WP
-
-
-        
+            # print("else")
         
         #Look for the the various parameters and save them
         '''
@@ -350,7 +348,10 @@ def Authorize():
         print("Your authorization may be not have suceeded.  See the above output to see if there was an error.")
     
 
-downstairs = pickle.load(open("pickles/downstairs.p",'rb'))    #   <=================================================================================== Why are these commented?  How else does the code load up the appropriate objects? WP
-upstairs = pickle.load(open("pickles/upstairs.p",'rb')) 
+
+# Uncomment below for offsite testing
+#downstairs = pickle.load(open("pickles/downstairs.p",'rb'))    # Why are these commented?  How else does the code load up the appropriate objects? WP, 
+#Control system loads them. If you import, they are loaded outside the control system's scope and I can't use them. See HourlySubprocess.py lines 43 though 61, PRD
+#upstairs = pickle.load(open("pickles/upstairs.p",'rb')) 
 
 ##Authorize()
