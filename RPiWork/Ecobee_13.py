@@ -55,6 +55,10 @@ class EcobeeThermostat:
             self.fan = fanMode
 
         # Changes the cool and heat hold temperatures before updating.
+        if type(coolTemp) != int and type(heatTemp) != int:
+            print("The input cool or heat temperature is not of type int.")
+            return
+
         if coolTemp < 400 or coolTemp > 1000:
             print("The input cool temperature is not within accepted range.")
             return
@@ -105,7 +109,6 @@ class EcobeeThermostat:
         s = requests.get(url_t, headers = url_Headers)
 
         #JSON operations to make the json parsable.
-        #PrintResponse(s)
         data = json.loads(s.text)
 
         #The simplification below will hold so long as there are only 2 thermostats in the system
@@ -113,7 +116,8 @@ class EcobeeThermostat:
             index = 0
         else:
             index = 1
-            # print("else") <============================== Why is this here? PRD
+            # print("else") <============================== Why is this here? PRD  <===================================================It was for my debugging use.  I forgot to delete it.  WP
+
 
         
         
@@ -144,6 +148,7 @@ class EcobeeThermostat:
         #Stores the values into the thermostat object pickle
         self.postToPickle()
 
+        print("Thermostat Parameters Successfully Updated.")
         return
 
 ######################################################################################################################################
@@ -156,6 +161,7 @@ class EcobeeThermostat:
         Headers()
         post_body = 'https://api.ecobee.com/1/thermostat?format=json&body='
         post_body_end = '}'
+
         # If you want a hold that only runs until a certain time, holdtype 
         #     becomes datetime, the number 4 changes to 6, and endtime and enddate parameters are needed
         url = post_body + Post_selection('thermostats', ""+str(self.thermostatID)+"", self.hvacMode) \
@@ -165,6 +171,9 @@ class EcobeeThermostat:
         post = requests.post(url, headers = url_Headers)
         if post.status_code == 200:
             return True
+        elif post.status_code == 401:
+            print("Error Code: 401  -- Authorization most likely needed.")
+            return False
         else:
             return False
 
@@ -176,22 +185,18 @@ class EcobeeThermostat:
         payload2 = {'grant_type': 'refresh_token','code':refresh_Token, 'client_id':API_Key}
         url_refresh = 'https://api.ecobee.com/token'
         p = requests.post(url_refresh, params = payload2)
-       # PrintResponse(p)
-        Refresh_json = p.json()
-        Refresh_json_string = str(Refresh_json)
-        
-        Access_beg_string = Refresh_json_string.index('access_token', 0, len(Refresh_json_string))
-        Access_temp_string = Refresh_json_string[Access_beg_string: Access_beg_string + 48]
-        Access_Code = Access_temp_string[16:48]
+
+        #Load JSON for parsing
+        response = json.loads(p.text)
+
         global Access_Token
-        Access_Token = str(Access_Code)
-        Refresh_beg_string = Refresh_json_string.index('refresh_token', 0, len(Refresh_json_string))
-        Refresh_temp_string = Refresh_json_string[Refresh_beg_string: Refresh_beg_string + 49]
-        Refresh_Code = Refresh_temp_string[17:49]
-        Token = str(Refresh_Code)
+        Access_Token = response["access_token"]
+
         file = open("Refresh.txt", "r+")
-        file.write(Token)
+        file.write(response["refresh_token"])
         file.close()
+
+        print("Refresh Token Successfully Updated.")
         return
 
     # Saves this instance in a similarly named pickle.
@@ -202,7 +207,7 @@ class EcobeeThermostat:
     
     
         
-    
+#Helper function to create the JSON for the function object in a HTTP post/get    
 def Post_function(number_params, function_type, parameter_1, value_1, parameter_2 = 0 , value_2 = 0 , parameter_3 = 0, value_3 = 0, parameter_4 = 0, value_4 = 0, parameter_5 = 0, value_5 = 0,\
               parameter_6 = 0, value_6 = 0, parameter_7 = 0, value_7 = 0, parameter_8 = 0, value_8 = 0, parameter_9  = 0, value_9 = 0):
     '''Helper function.'''        
@@ -249,7 +254,9 @@ def Post_function(number_params, function_type, parameter_1, value_1, parameter_
     else:
         return(url_function)
     
-# Creates the nescessary headers.
+
+# Creates the nescessary headers.  Example is below
+#url_Headers = {'content_type': 'application/json;charset=UTF-8','authorization': 'Bearer lOyymgBi9X6ltSKVJ8oGfsu9NBxcoTwT'}
 def Headers():
     A = 'content_type'
     B = 'application/json;charset=UTF-8'
@@ -260,7 +267,7 @@ def Headers():
     Token = D + Access
     global url_Headers
     url_Headers = {A: B,C: Token}
-    #url_Headers = {'content_type': 'application/json;charset=UTF-8','authorization': 'Bearer lOyymgBi9X6ltSKVJ8oGfsu9NBxcoTwT'}
+    
 
 
 # This function is a helper function to print the various components of a request object.
@@ -279,7 +286,7 @@ def PrintResponse(x):
     print(x.status_code)
     print()
 
-# Helper function.
+# Helper function to create the JSON for the selection object.  The selection object selects the correct thermostat when http operations are performed
 def Post_selection(selection_type, selection_match, HVACMode):
     selection_body_A = '{"selection": {'\
                             '"selectionType":"'
@@ -298,57 +305,52 @@ def Post_selection(selection_type, selection_match, HVACMode):
 def Authorize():
     print('Welcome to Authorization!')
     print()
-    option = input('Press enter to begin, or type exit and enter to quit')
-    if option != '':
+    if input('Press enter to begin, or type exit and enter to quit') != '':
         return
     print()
+
     #Setting Authorization Pin
     url_auth = 'https://api.ecobee.com/authorize'
     r = requests.get(url_auth, params = payload)
-    PrintResponse(r)
+    origionalResponse = json.loads(r.text)
+    
+    print("Ecobee Pin = " + origionalResponse["ecobeePin"])
+    print()
     print("Locate the four digit key to the right of ecobeePin.  Go to ecobee.com, login, go the the settings tab \
-open the apps tab on the left side of the screen, enter the four digit key, and return to idle")
+        open the apps tab on the left side of the screen, enter the four digit key, and return to idle.")
     time.sleep(5)
     print()
     print()
-    input("Once you have put this key into ecobee.com, hit enter in idle to contine with the authorization process")
+    input("Once you have put this key into ecobee.com, hit enter in idle to contine with the authorization process.")
     file = open("Refresh.txt","r+")
     refresh_Token = file.read(49)
     file.close()
     print()
     print()
-    code = str(input("In the output of the shell, there should be a code that looks like 'MiDabdFefxh9SCDta6CjNa64caJeTLTE', copy the one that you got on this line (but without any quotes!!!!!), and press enter"))
+    code = origionalResponse["code"]
+
     payload_auth = {'grant_type': 'ecobeePin','code':code, 'client_id':API_Key}
     url_refresh = 'https://api.ecobee.com/token'
     p = requests.post(url_refresh, params = payload_auth)
-    PrintResponse(p)
-    Refresh_json = p.json()
-    Refresh_json_string = str(Refresh_json)
-    Access_beg_string = Refresh_json_string.index('access_token', 0, len(Refresh_json_string))
-    Access_temp_string = Refresh_json_string[Access_beg_string: Access_beg_string + 48]
-    Access_Code = Access_temp_string[16:48]
+    response = json.loads(p.text)
+
     global Access_Token
-    Access_Token = str(Access_Code)
-    Refresh_beg_string = Refresh_json_string.index('refresh_token', 0, len(Refresh_json_string))
-    Refresh_temp_string = Refresh_json_string[Refresh_beg_string: Refresh_beg_string + 49]
-    Refresh_Code = Refresh_temp_string[17:49]
-    Token = str(Refresh_Code)
+    Access_Token = response["access_token"]
+
     file = open("Refresh.txt", "r+")
-    file.write(Token)
+    file.write(response["refresh_token"])
     file.close()
-    ##Implement a check to look for the number 200, the sucess status code, towards the end of the file
+
+    ##Implement a check to look for status code 200, the sucess code to ensure auth success
     if r.status_code == 200:
-        print()
-        print()
+
         print("Authorization Complete!")
     else:
-        Print(p)
-        print()
-        print()
+        PrintResponse(p)
         print("Your authorization may be not have suceeded.  See the above output to see if there was an error.")
     
 
-#downstairs = pickle.load(open("pickles/downstairs.p",'rb'))
-#upstairs = pickle.load(open("pickles/upstairs.p",'rb'))
+downstairs = pickle.load(open("pickles/downstairs.p",'rb'))    #   <=================================================================================== Why are these commented?  How else does the code load up the appropriate objects? WP
+upstairs = pickle.load(open("pickles/upstairs.p",'rb')) 
 
 ##Authorize()
