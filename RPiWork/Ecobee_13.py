@@ -74,6 +74,7 @@ class EcobeeThermostat:
 
         #Posting occurs
         result = self.postToDevice() # <====== Kill this line for offsite testing =======================
+        #result = True
 
         #Updates the pickle with what the thermostat was set to and returns appropriate boolean with appropriate status
         if result == True:

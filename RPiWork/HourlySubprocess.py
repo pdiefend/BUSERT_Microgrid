@@ -80,6 +80,12 @@ if(current['mode'] == 'Normal'):
     current['DownNormCool'] = downstairs.coolHoldTemp
     current['UpNormHeat'] = upstairs.heatHoldTemp
     current['UpNormCool'] = upstairs.coolHoldTemp
+upFan = upstairs.fan
+downFan = downstairs.fan
+
+upMode = upstairs.hvacMode
+downMode = downstairs.hvacMode
+
 
 hour = datetime.datetime.now().time().hour
 
@@ -113,45 +119,46 @@ if (currentMode != current['mode']):
     if(currentMode == 'Consumption'):
         # Consumption Mode Activate all consumption devices
         Island.GridTie()
-        upstairs.changeSettings(current['UpNormHeat'] + preHeatDelta, current['UpNormCool'] -preCoolDelta, 'on', 'auto')
+        upstairs.changeSettings(current['UpNormHeat'] + preHeatDelta, current['UpNormCool'] -preCoolDelta, 'on', upMode)
         # delay?
-        downstairs.changeSettings(current['DownNormHeat'] + preHeatDelta, current['DownNormCool'] -preCoolDelta, 'on', 'auto')
+        downstairs.changeSettings(current['DownNormHeat'] + preHeatDelta, current['DownNormCool'] -preCoolDelta, 'on', downMode)
     
     elif(currentMode == 'Pre-heat'):
         # Pre-heat the HVAC system
         Island.GridTie()
-        upstairs.changeSettings(current['UpNormHeat'] + preHeatDelta, current['UpNormCool'], 'auto', 'auto')
+        upstairs.changeSettings(current['UpNormHeat'] + preHeatDelta, current['UpNormCool'], 'auto', upMode)
         # delay?
-        downstairs.changeSettings(current['DownNormHeat']+ preHeatDelta, current['DownNormCool'], 'auto', 'auto')    
+        downstairs.changeSettings(current['DownNormHeat']+ preHeatDelta, current['DownNormCool'], 'auto', downMode)    
     
     elif(currentMode == 'Pre-cool'):
         # Pre-cool the HVAC system
         Island.GridTie()
-        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'] - preCoolDelta, 'auto', 'auto')
+        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'] - preCoolDelta, 'auto', upMode)
         # delay?
-        downstairs.changeSettings(current['DownNormHeat'], current['DownNormCool'] - preCoolDelta, 'auto', 'auto')    
+        downstairs.changeSettings(current['DownNormHeat'], current['DownNormCool'] - preCoolDelta, 'auto', downMode)    
     
     elif(currentMode == 'LM'):
         Island.GridTie()
         # Reduce Managed Loads and set HVAC to conservation points
-        upstairs.changeSettings(current['UpNormHeat'] - LMHeatDelta, current['UpNormCool'] + LMCoolDelta, 'on', 'auto')
+        upstairs.changeSettings(current['UpNormHeat'] - LMHeatDelta, current['UpNormCool'] + LMCoolDelta, 'on', upMode)
         # delay?
-        downstairs.changeSettings(current['DownNormHeat'] - LMHeatDelta, current['DownNormCool'] + LMCoolDelta, 'on', 'auto')
+        downstairs.changeSettings(current['DownNormHeat'] - LMHeatDelta, current['DownNormCool'] + LMCoolDelta, 'on', downMode)
     
     elif(currentMode == 'Island'):
         # Island Mode (a.k.a. isolated reduction)
         # Run Island Subprocess
         Island.Island(False)
         # 5 min should handle LM if Islanded
-        upstairs.changeSettings(current['UpNormHeat'] - LMHeatDelta, current['UpNormCool'] + LMCoolDelta, 'on', 'auto')
+        upstairs.changeSettings(current['UpNormHeat'] - LMHeatDelta, current['UpNormCool'] + LMCoolDelta, 'on', upMode)
         # delay?
-        downstairs.changeSettings(current['DownNormHeat'] - LMHeatDelta, current['DownNormCool'] + LMCoolDelta, 'on', 'auto')
+        downstairs.changeSettings(current['DownNormHeat'] - LMHeatDelta, current['DownNormCool'] + LMCoolDelta, 'on', downMode)
     
     else: #(currentMode == 'Normal')
         # Normal Mode    
         Island.GridTie()
-        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'], 'auto', 'auto')
+        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'], 'auto', upMode)
         # delay?
+        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'], 'auto', downMode)
 else:
     print('Modes have not changed since last hour') 
 
