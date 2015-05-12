@@ -7,13 +7,14 @@ from WU import WU
 import Island
 import datetime
 from Ecobee_13 import EcobeeThermostat
+import uGrid_Params
 
 
-preCoolDelta = 50 # amount setpoint is varied during precooling
-preHeatDelta = 50 # amount setpoint is varied during preheating
+preCoolDelta = uGrid_Params.PRE_COOL_DELTA # amount setpoint is varied during precooling
+preHeatDelta = uGrid_Params.PRE_COOL_DELTA # amount setpoint is varied during preheating
 
-LMCoolDelta = 50 # amount setpoint is varied during Load Management Mode
-LMHeatDelta = 50 # amount setpoint is varied during Load Management Mode
+LMCoolDelta = uGrid_Params.LM_COOL_DELTA # amount setpoint is varied during Load Management Mode
+LMHeatDelta = uGrid_Params.LM_HEAT_DELTA # amount setpoint is varied during Load Management Mode
 
 print('==================================================')
 print('Hourly Subprocess')
@@ -82,7 +83,6 @@ if(current['mode'] == 'Normal'):
     current['UpNormCool'] = upstairs.coolHoldTemp
 upFan = upstairs.fan
 downFan = downstairs.fan
-
 upMode = upstairs.hvacMode
 downMode = downstairs.hvacMode
 
@@ -109,7 +109,13 @@ if(currentMode == 'LM' or currentMode == 'Island'):
     if(conditions == 'Clear' or conditions == 'Partly Cloudy'):
         currentMode = 'LM'
     else:
-        currentMode = 'Island'
+        # Check to see if we are over the Generator LMP
+        if currentLMP > uGrid_Params.GEN_LMP_THRESHOLD:
+            # If so, Island the microgird            
+            currentMode = 'Island'
+        else:
+            # If current LMP < Generator LMP, then it is not worth running.
+            currentMode = 'LM'
         
 print(currentMode)
 

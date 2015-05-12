@@ -244,9 +244,9 @@ def Post_function(number_params, function_type, parameter_1, value_1, parameter_
     url_function = url_fn[0:len(url_fn) - 4]
     url_function =  url_function + function_body_end
     
-    print(url_function)
-    print(parameter_string)
-    print(value_string)
+    #print(url_function)
+    #print(parameter_string)
+    #print(value_string)
                    
     
     if (function_type == 0):
