@@ -12,9 +12,9 @@ class LMP_Downloader:
         self.Location = Location        
 
     def tomorrowLMPfilename(self):
-        year = str((date.today()+timedelta(0)).year)
-        month = (date.today()+timedelta(0)).month
-        day= (date.today()+timedelta(0)).day
+        year = str((date.today()+timedelta(1)).year)
+        month = (date.today()+timedelta(1)).month
+        day= (date.today()+timedelta(1)).day
         if month < 10:
                month = "0"+ str(month)
         else:

@@ -12,6 +12,8 @@ Gmail_User = passwords.GMAIL_USER
 Gmail_Pass = passwords.GMAIL_PASS
 recpients = passwords.GMAIL_RECP
 
+ATS_ALLOWED = passwords.ATS_ALLOWED
+
 # pull pin 9 high to remote island, pull pin 9 low to return to auto
 island_url =  'http://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&led=1'
 gridTie_url = 'http://agent.electricimp.com/'+ATS_base+'?username='+username+'&password='+password+'&led=0'
@@ -42,14 +44,16 @@ def Island(outage):
         #server.sendmail(Gmail_User, recpients, 'Microgrid will now Island itself')
         #server.quit()
         # Island the Microgrid
-        #urllib.request.urlretrieve(island_url, 'impStat.txt') # <==================================
+        if ATS_ALLOWED:
+            urllib.request.urlretrieve(island_url, 'impStat.txt') # <==================================
 
 # Reconnect to the Power grid and re-enable Raux2
 # If we are islanded due to an outage condition, we will remain on the
 # generator. This essentially returns the ATS to "auto"
 def GridTie():
     print('ATS set to AUTO')
-    urllib.request.urlretrieve(gridTie_url, 'impStat.txt')
+    if ATS_ALLOWED:
+        urllib.request.urlretrieve(gridTie_url, 'impStat.txt') # <==================================
     #urllib.request.urlretrieve(raux_on_url, 'impStat.txt') # <==================================
 
 # Check status of the ATS, does not change island status
