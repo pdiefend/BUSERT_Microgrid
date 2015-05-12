@@ -1,4 +1,5 @@
 #! /bin/bash
 cd /home/pi/BUSERT_Microgrid/RPiWork
-/usr/local/bin/python3 HourlySubprocess.py >> ~/datalogs/log.txt
+DATE=`date +%Y-%m-%d`
+/usr/local/bin/python3 HourlySubprocess.py >> ~/datalogs/$DATE.txt
 

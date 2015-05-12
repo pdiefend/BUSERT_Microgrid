@@ -166,7 +166,7 @@ class EcobeeThermostat:
         url = post_body + Post_selection('thermostats', ""+str(self.thermostatID)+"", self.hvacMode) \
          + Post_function(4, 'setHold', 'fan', self.fan, 'heatHoldTemp', self.heatHoldTemp, 'coolHoldTemp',
          self.coolHoldTemp, 'holdType', 'indefinite') + post_body_end
-        print(url)
+        #print(url) # <=================================================
         post = requests.post(url, headers = url_Headers)
         if post.status_code == 200:
             return True
