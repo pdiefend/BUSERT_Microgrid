@@ -187,6 +187,7 @@ class EcobeeThermostat:
 
         #Load JSON for parsing
         response = json.loads(p.text)
+        #print(response) # <====================================================================
 
         global Access_Token
         Access_Token = response["access_token"]
@@ -311,7 +312,7 @@ def Authorize():
     #Setting Authorization Pin
     url_auth = 'https://api.ecobee.com/authorize'
     r = requests.get(url_auth, params = payload)
-    origionalResponse = json.loads(r.text)
+    origionalResponse = json.loads(r.text) # Spell check...
     
     print("Ecobee Pin = " + origionalResponse["ecobeePin"])
     print()
