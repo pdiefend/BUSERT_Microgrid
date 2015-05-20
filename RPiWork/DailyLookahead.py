@@ -30,44 +30,44 @@ except FileNotFoundError:
 
 
 # Download the Weather Data
-#weather = WU('Lewisburg')
-#weather.refresh()
-#hourlyForecast = weather.hourly_forecast()
+weather = WU('Lewisburg')
+weather.refresh()
+hourlyForecast = weather.hourly_forecast()
 
 # Download Tomorrow's LMP Data
-#lmpDL = LMP_Downloader('PPL')
-#lmp = lmpDL.DL_LMP()
+lmpDL = LMP_Downloader('PPL')
+lmp = lmpDL.DL_LMP()
 
 # ======================================================================
 # Place testing arrays here
-lmp = [25, 24, 24, 24, 200, 28, 50, 48, 49, 38, 47, 57,
- 58, 60, 90, 120, 160, 250, 260, 220, 190, 20, 0, -10]
+#lmp = [25, 24, 24, 24, 200, 28, 50, 48, 49, 38, 47, 57,
+# 58, 60, 90, 120, 160, 250, 260, 220, 190, 20, 0, -10]
 
-hourlyForecast = [{'daylight': False, 'hour': '0',  'temp': '36', 'condition': 'Clear'},
-                  {'daylight': False, 'hour': '1',  'temp': '34', 'condition': 'Clear'},
-                  {'daylight': False, 'hour': '2',  'temp': '33', 'condition': 'Clear'},
-                  {'daylight': False, 'hour': '3',  'temp': '32', 'condition': 'Clear'},
-                  {'daylight': False, 'hour': '4',  'temp': '31', 'condition': 'Clear'},
-                  {'daylight': False, 'hour': '5',  'temp': '30', 'condition': 'Clear'},
-                  {'daylight': False, 'hour': '6',  'temp': '30', 'condition': 'Clear'},
-                  {'daylight': True,  'hour': '7',  'temp': '32', 'condition': 'Clear'}, 
-                  {'daylight': True,  'hour': '8',  'temp': '36', 'condition': 'Clear'}, 
-                  {'daylight': True,  'hour': '9',  'temp': '41', 'condition': 'Clear'}, 
-                  {'daylight': True,  'hour': '10', 'temp': '45', 'condition': 'Clear'}, 
-                  {'daylight': True,  'hour': '11', 'temp': '49', 'condition': 'Clear'}, 
-                  {'daylight': True,  'hour': '12', 'temp': '53', 'condition': 'Clear'}, 
-                  {'daylight': True,  'hour': '13', 'temp': '56', 'condition': 'Partly Cloudy'}, 
-                  {'daylight': True,  'hour': '14', 'temp': '58', 'condition': 'Partly Cloudy'}, 
-                  {'daylight': True,  'hour': '15', 'temp': '59', 'condition': 'Partly Cloudy'}, 
-                  {'daylight': True,  'hour': '16', 'temp': '59', 'condition': 'Partly Cloudy'}, 
-                  {'daylight': True,  'hour': '17', 'temp': '59', 'condition': 'Partly Cloudy'}, 
-                  {'daylight': True,  'hour': '18', 'temp': '58', 'condition': 'Partly Cloudy'}, 
-                  {'daylight': False, 'hour': '19', 'temp': '56', 'condition': 'Mostly Cloudy'},
-                  {'daylight': False, 'hour': '20', 'temp': '52', 'condition': 'Mostly Cloudy'}, 
-                  {'daylight': False, 'hour': '21', 'temp': '50', 'condition': 'Mostly Cloudy'}, 
-                  {'daylight': False, 'hour': '22', 'temp': '47', 'condition': 'Overcast'}, 
-                  {'daylight': False, 'hour': '23', 'temp': '45', 'condition': 'Overcast'}]
-
+#hourlyForecast = [{'daylight': False, 'hour': '0',  'temp': '36', 'condition': 'Clear'},
+#                  {'daylight': False, 'hour': '1',  'temp': '34', 'condition': 'Clear'},
+#                  {'daylight': False, 'hour': '2',  'temp': '33', 'condition': 'Clear'},
+#                  {'daylight': False, 'hour': '3',  'temp': '32', 'condition': 'Clear'},
+#                  {'daylight': False, 'hour': '4',  'temp': '31', 'condition': 'Clear'},
+#                  {'daylight': False, 'hour': '5',  'temp': '30', 'condition': 'Clear'},
+#                  {'daylight': False, 'hour': '6',  'temp': '30', 'condition': 'Clear'},
+#                  {'daylight': True,  'hour': '7',  'temp': '32', 'condition': 'Clear'}, 
+#                  {'daylight': True,  'hour': '8',  'temp': '36', 'condition': 'Clear'}, 
+#                  {'daylight': True,  'hour': '9',  'temp': '41', 'condition': 'Clear'}, 
+#                  {'daylight': True,  'hour': '10', 'temp': '45', 'condition': 'Clear'}, 
+#                  {'daylight': True,  'hour': '11', 'temp': '49', 'condition': 'Clear'}, 
+#                  {'daylight': True,  'hour': '12', 'temp': '53', 'condition': 'Clear'}, 
+#                  {'daylight': True,  'hour': '13', 'temp': '56', 'condition': 'Partly Cloudy'}, 
+#                  {'daylight': True,  'hour': '14', 'temp': '58', 'condition': 'Partly Cloudy'}, 
+#                  {'daylight': True,  'hour': '15', 'temp': '59', 'condition': 'Partly Cloudy'}, 
+#                  {'daylight': True,  'hour': '16', 'temp': '59', 'condition': 'Partly Cloudy'}, 
+#                  {'daylight': True,  'hour': '17', 'temp': '59', 'condition': 'Partly Cloudy'}, 
+#                  {'daylight': True,  'hour': '18', 'temp': '58', 'condition': 'Partly Cloudy'}, 
+#                  {'daylight': False, 'hour': '19', 'temp': '56', 'condition': 'Mostly Cloudy'},
+#                  {'daylight': False, 'hour': '20', 'temp': '52', 'condition': 'Mostly Cloudy'}, 
+#                  {'daylight': False, 'hour': '21', 'temp': '50', 'condition': 'Mostly Cloudy'}, 
+#                  {'daylight': False, 'hour': '22', 'temp': '47', 'condition': 'Overcast'}, 
+#                  {'daylight': False, 'hour': '23', 'temp': '45', 'condition': 'Overcast'}]
+#
 # ======================================================================
 
 pickle.dump(lmp, open('pickles/LMP.p','wb'))
