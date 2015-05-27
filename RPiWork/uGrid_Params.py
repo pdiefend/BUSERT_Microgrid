@@ -10,5 +10,5 @@ CONSUME_LMP_THRESHOLD = 0 # LMP Threshold to activate Consumption Loads
 
 HVAC_PREP_HOURS = 4 # Number of hours to Pre-heat/Pre-cool System
 
-COOL_THRESHOLD = 5
-HEAT_THRESHOLD = 5
+COOL_THRESHOLD = 50
+HEAT_THRESHOLD = 50

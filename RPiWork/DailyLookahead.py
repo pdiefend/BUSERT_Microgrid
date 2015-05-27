@@ -26,7 +26,7 @@ except FileNotFoundError:
     print('WARN: current settings will be restored by Hourly Subprocess at next hour')
     # Restore settings from the Ecobee. Create a spot for outage, 
     # 5Min will set it properly in a few seconds
-    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 60, 'DownNormCool': 73, 'UpNormHeat': 65, 'UpNormCool': 73,'outage': False}
+    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 600, 'DownNormCool': 730, 'UpNormHeat': 650, 'UpNormCool': 730,'outage': False}
 
 
 # Download the Weather Data
@@ -35,8 +35,8 @@ weather.refresh()
 hourlyForecast = weather.hourly_forecast()
 
 # Download Tomorrow's LMP Data
-lmpDL = LMP_Downloader('PPL')
-lmp = lmpDL.DL_LMP()
+#lmpDL = LMP_Downloader('PPL')
+#lmp = lmpDL.DL_LMP()
 
 # ======================================================================
 # Place testing arrays here
@@ -70,7 +70,8 @@ lmp = lmpDL.DL_LMP()
 #
 # ======================================================================
 
-pickle.dump(lmp, open('pickles/LMP.p','wb'))
+#pickle.dump(lmp, open('pickles/LMP.p','wb'))
+lmp = pickle.load(open('pickles/LMP.p', 'rb'))
 hourModes = []
 
 # Iterate through all hours to plan the day
@@ -99,13 +100,13 @@ for hour in range(2, 24):
     #print(hourModes[hour])
     # First compare setpoint against forecast to determine if 
     #you can pre-heat/cool and which you should do 
-    if((hourModes[hour] == 'LM' or hourModes[hour] == 'Island') and ((current['UpNormCool']+uGrid_Params.COOL_THRESHOLD) < int(hourlyForecast[hour]['temp']))):
+    if((hourModes[hour] == 'LM' or hourModes[hour] == 'Island') and ((current['UpNormCool']+uGrid_Params.COOL_THRESHOLD) < int(hourlyForecast[hour]['temp'])*10)):
         # Pre-cooling the previous 3 hours
         for i in range(1,(prepHours+1)):
             if((hourModes[hour-i] == 'Normal' or hourModes[hour-i] == 'Consume') and (hour-i) >= 0):
                 hourModes[hour-i] = 'Pre-cool'
    
-    elif((hourModes[hour] == 'LM' or hourModes[hour] == 'Island')  and ((current['UpNormHeat']-uGrid_Params.HEAT_THRESHOLD) > int(hourlyForecast[hour]['temp']))):
+    elif((hourModes[hour] == 'LM' or hourModes[hour] == 'Island')  and ((current['UpNormHeat']-uGrid_Params.HEAT_THRESHOLD) > int(hourlyForecast[hour]['temp'])*10)):
         # Pre-heating the previous 3 hours
         for i in range(1,(prepHours+1)):
             if((hourModes[hour-i] == 'Normal' or hourModes[hour-i] == 'Consume') and (hour-i) >= 0):
