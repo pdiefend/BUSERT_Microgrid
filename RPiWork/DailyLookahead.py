@@ -35,8 +35,8 @@ weather.refresh()
 hourlyForecast = weather.hourly_forecast()
 
 # Download Tomorrow's LMP Data
-#lmpDL = LMP_Downloader('PPL')
-#lmp = lmpDL.DL_LMP()
+lmpDL = LMP_Downloader('PPL')
+lmp = lmpDL.DL_LMP()
 
 # ======================================================================
 # Place testing arrays here
@@ -70,8 +70,8 @@ hourlyForecast = weather.hourly_forecast()
 #
 # ======================================================================
 
-#pickle.dump(lmp, open('pickles/LMP.p','wb'))
-lmp = pickle.load(open('pickles/LMP.p', 'rb'))
+pickle.dump(lmp, open('pickles/LMP.p','wb'))
+#lmp = pickle.load(open('pickles/LMP.p', 'rb'))
 hourModes = []
 
 # Iterate through all hours to plan the day
