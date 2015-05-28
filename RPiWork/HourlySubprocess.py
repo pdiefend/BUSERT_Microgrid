@@ -164,7 +164,7 @@ if (currentMode != current['mode']):
         Island.GridTie()
         upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'], 'auto', upMode)
         # delay?
-        upstairs.changeSettings(current['UpNormHeat'], current['UpNormCool'], 'auto', downMode)
+        downstairs.changeSettings(current['DownNormHeat'], current['DownNormCool'], 'auto', downMode)
 else:
     print('Modes have not changed since last hour') 
 
