@@ -12,3 +12,7 @@ HVAC_PREP_HOURS = 4 # Number of hours to Pre-heat/Pre-cool System
 
 COOL_THRESHOLD = 50
 HEAT_THRESHOLD = 50
+
+Heat1 = {'name' : 'Heat1', 'power' : 1500, 'on' , False}
+Heat2 = {'name' : 'Heat2', 'power' : 1500, 'on' , False}
+Volt = {'name' : 'Volt Charger', 'power' : 900, 'on' , False}

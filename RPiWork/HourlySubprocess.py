@@ -69,7 +69,7 @@ except FileNotFoundError:
     print('Recovering lost data')
     # Restore settings from the Ecobee. Create a spot for outage, 
     # 5Min will set it properly in a few seconds
-    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 600, 'DownNormCool': 730, 'UpNormHeat': 600, 'UpNormCool': 730,'outage': False, 'tempDiff': 0}
+    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 600, 'DownNormCool': 730, 'UpNormHeat': 600, 'UpNormCool': 730,'outage': False, 'tempDiff': 0, 'leveling' : False}
 
 # Refresh values from the Thermostats in case user changed them
 downstairs.refreshValues()

@@ -26,7 +26,7 @@ except FileNotFoundError:
     print('WARN: current settings will be restored by Hourly Subprocess at next hour')
     # Restore settings from the Ecobee. Create a spot for outage, 
     # 5Min will set it properly in a few seconds
-    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 600, 'DownNormCool': 730, 'UpNormHeat': 600, 'UpNormCool': 730,'outage': False, 'tempDiff': 0}
+    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 600, 'DownNormCool': 730, 'UpNormHeat': 600, 'UpNormCool': 730,'outage': False, 'tempDiff': 0, 'leveling' : False}
 
 
 # Download the Weather Data
