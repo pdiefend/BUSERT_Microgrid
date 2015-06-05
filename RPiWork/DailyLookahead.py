@@ -26,7 +26,7 @@ except FileNotFoundError:
     print('WARN: current settings will be restored by Hourly Subprocess at next hour')
     # Restore settings from the Ecobee. Create a spot for outage, 
     # 5Min will set it properly in a few seconds
-    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 600, 'DownNormCool': 730, 'UpNormHeat': 650, 'UpNormCool': 730,'outage': False}
+    current = {'conditions': 'ERROR', 'mode': 'ERROR', 'lmp': 'ERROR','DownNormHeat': 600, 'DownNormCool': 730, 'UpNormHeat': 600, 'UpNormCool': 730,'outage': False, 'tempDiff': 0}
 
 
 # Download the Weather Data
@@ -74,17 +74,23 @@ pickle.dump(lmp, open('pickles/LMP.p','wb'))
 #lmp = pickle.load(open('pickles/LMP.p', 'rb'))
 hourModes = []
 
+# counter for the number of hours that LM will be active
+HoursLM = 0
+
 # Iterate through all hours to plan the day
 for hour in range(0, 24):
     if(lmp[hour] > LM_Threshold):
         # If high PV output expected:
         if(((hourlyForecast[hour]['condition'] == 'Clear') or (hourlyForecast[hour]['condition'] == 'Partly Cloudy')) and hourlyForecast[hour]['daylight']):
             hourModes.append('LM')
+            hoursLM = hoursLM + 1
         else:
             if (lmp[hour] > Gen_Threshold):
                 hourModes.append('Island')
+                hoursLM = hoursLM + 1
             else:
                 hourModes.append('LM')
+                hoursLM = hoursLM + 1
     elif (lmp[hour] < CM_Threshold):
         hourModes.append('Consume')
     else:
@@ -92,8 +98,12 @@ for hour in range(0, 24):
 
 
 # This does not make use of most opportune times to pre-heat/pre-cool
-
 prepHours = uGrid_Params.HVAC_PREP_HOURS
+
+# As was found during the thermal analysis we will drop the temperature during the precool
+# stage by 0.5 deg F for evey hour of preheating and precooling. Then the remainder will be
+# handled during the recovery period if needed, otherwise the recovery period will not occur.
+current['tempDiff'] = HoursLM * 5 # (0.5 deg/hour * 10 for ecobee adjustment)
 
 # If needed, pre-heat or pre-cool
 for hour in range(2, 24):
@@ -118,6 +128,7 @@ for hour in hourModes:
 
 # Store Hour Modes in a pickle
 pickle.dump(hourModes, open('pickles/hourModes.p','wb'))
+pickle.dump(current, open('pickles/current.p', 'wb'))
 
 # all hour Modes == Normal, Pre-heat, Pre-cool, Consumption, LM, Island and Outage
 
