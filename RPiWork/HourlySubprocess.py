@@ -120,7 +120,7 @@ if(currentMode == 'LM' or currentMode == 'Island'):
 print(currentMode)
 
 # If the last mode != current mode, change thermostat/ATS, else leave it be.
-if (currentMode != current['mode']) and !current['outage']:
+if (currentMode != current['mode']) and not current['outage']:
     print('Modes Changed since last hour')
     if(currentMode == 'Consumption'):
         # Consumption Mode Activate all consumption devices
